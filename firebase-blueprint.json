@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "DetectionLog": {
+      "title": "Detection Log",
+      "description": "Record of a face mask detection event",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the system user who was monitoring" },
+        "userName": { "type": "string", "description": "Name of the system user" },
+        "status": { "type": "string", "enum": ["mask", "no_mask"], "description": "Whether a mask was detected" },
+        "timestamp": { "type": "object", "description": "Firestore server timestamp" },
+        "location": { "type": "string", "description": "Camera location identifier" },
+        "confidence": { "type": "number", "description": "AI model confidence score" }
+      },
+      "required": ["userId", "status", "timestamp", "location"]
+    },
+    "User": {
+      "title": "User",
+      "description": "System administrator or operator",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "operator"] },
+        "displayName": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "logs": {
+      "schema": "DetectionLog",
+      "description": "Collection of all mask detection logs"
+    },
+    "users": {
+      "schema": "User",
+      "description": "System users and their roles"
+    }
+  }
+}

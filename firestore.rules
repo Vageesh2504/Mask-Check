@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // 
+    // Collection: users
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - role: string (required, ['admin', 'operator'])
+    //   - displayName: string (optional)
+    //
+    // Collection: logs
+    // Fields:
+    //   - userId: string (required)
+    //   - userName: string (optional)
+    //   - status: string (required, ['mask', 'no_mask'])
+    //   - timestamp: string (required, ISO 8601)
+    //   - location: string (required)
+    //   - confidence: number (optional)
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "hlvageesh2504@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidLog(data) {
+      return data.keys().hasAll(['userId', 'status', 'timestamp', 'location']) &&
+             data.status in ['mask', 'no_mask'] &&
+             data.userId == request.auth.uid &&
+             data.timestamp is timestamp;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    match /logs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidLog(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+  }
+}

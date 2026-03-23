@@ -1,0 +1,7 @@
+{
+  "name": "GuardMask AI",
+  "description": "Real-time AI-powered face mask detection system with a secure admin dashboard for monitoring, logging, and reporting.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
